@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Datos de transferencia Urban Nikkei</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=DM+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+  /* Layout: one narrow slip for a phone held in one hand. Name band on top, one tappable row per dato, a single primary action at the end. */
+  :root {
+    --bg: #F2F0F7;
+    --surface: #FFFFFF;
+    --ink: #1B1838;
+    --muted: #615C82;
+    --line: #DBD7E8;
+    --accent: #C92F60;
+    --accent-ink: #FFFFFF;
+    --ok: #1B7550;
+    --press: #ECE9F5;
+
+    --font-display: "Dela Gothic One", "Arial Black", "Helvetica Neue", sans-serif;
+    --font-body: "Zen Kaku Gothic New", "Helvetica Neue", Arial, sans-serif;
+    --font-data: "DM Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121027;
+      --surface: #1C1938;
+      --ink: #EFECFA;
+      --muted: #A49FC4;
+      --line: #332F5A;
+      --accent: #FF7A9F;
+      --accent-ink: #220812;
+      --ok: #62D6A3;
+      --press: #262250;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121027;
+    --surface: #1C1938;
+    --ink: #EFECFA;
+    --muted: #A49FC4;
+    --line: #332F5A;
+    --accent: #FF7A9F;
+    --accent-ink: #220812;
+    --ok: #62D6A3;
+    --press: #262250;
+    color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; }
+  [hidden] { display: none !important; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.45;
+    padding-inline: 16px;
+    padding-block: 20px 32px;
+  }
+
+  .slip {
+    max-width: 26rem;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .band {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-radius: 6px;
+    padding: 20px 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .band .eyebrow {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .band h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.7rem, 8.5vw, 2.3rem);
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+
+  .rows {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .row {
+    appearance: none;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 14px 16px;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    transition: background-color 120ms ease;
+  }
+  .row:last-child { border-bottom: 0; }
+  .row:active { background: var(--press); }
+  .row:focus-visible,
+  .all:focus-visible,
+  .manual textarea:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: -3px;
+  }
+
+  .row-text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .value {
+    font-size: 1.12rem;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+  }
+  .value.data {
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+  }
+  .hint {
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  .chip {
+    flex: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    border: 1.5px solid currentColor;
+    border-radius: 999px;
+    padding: 5px 12px;
+    min-width: 5.4rem;
+    text-align: center;
+  }
+  .row.done .chip { color: var(--ok); }
+
+  .all {
+    appearance: none;
+    font: inherit;
+    font-weight: 700;
+    font-size: 1.05rem;
+    background: var(--ink);
+    color: var(--bg);
+    border: 0;
+    border-radius: 6px;
+    padding: 16px 20px;
+    min-height: 56px;
+    cursor: pointer;
+  }
+  .all:focus-visible { outline-offset: 3px; }
+  .all:active { opacity: 0.88; }
+
+  .status {
+    min-height: 1.45em;
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--ok);
+    text-align: center;
+  }
+
+  .manual {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .manual p { margin: 0; font-size: 0.92rem; }
+  .manual textarea {
+    width: 100%;
+    font-family: var(--font-data);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 12px;
+    resize: none;
+  }
+
+  .note {
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--muted);
+    max-width: 65ch;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .row { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<main class="slip">
+  <header class="band">
+    <span class="eyebrow">Datos de transferencia</span>
+    <h1>Urban Nikkei SpA</h1>
+  </header>
+
+  <section class="rows" aria-label="Datos de la cuenta. Toque un dato para copiarlo.">
+    <button type="button" class="row" id="copiar-nombre" data-copy="Urban Nikkei SpA">
+      <span class="row-text">
+        <span class="label">Nombre</span>
+        <span class="value">Urban Nikkei SpA</span>
+      </span>
+      <span class="chip" aria-hidden="true">Copiar</span>
+    </button>
+
+    <button type="button" class="row" id="copiar-rut" data-copy="78.206.962-4">
+      <span class="row-text">
+        <span class="label">RUT</span>
+        <span class="value data">78.206.962-4</span>
+      </span>
+      <span class="chip" aria-hidden="true">Copiar</span>
+    </button>
+
+    <button type="button" class="row" id="copiar-banco" data-copy="Banco Santander">
+      <span class="row-text">
+        <span class="label">Banco</span>
+        <span class="value">Banco Santander</span>
+      </span>
+      <span class="chip" aria-hidden="true">Copiar</span>
+    </button>
+
+    <button type="button" class="row" id="copiar-tipo" data-copy="Cuenta Corriente">
+      <span class="row-text">
+        <span class="label">Tipo de cuenta</span>
+        <span class="value">Cuenta Corriente</span>
+      </span>
+      <span class="chip" aria-hidden="true">Copiar</span>
+    </button>
+
+    <button type="button" class="row" id="copiar-cuenta" data-copy="98726420">
+      <span class="row-text">
+        <span class="label">N° de cuenta</span>
+        <span class="value data">0-000-9872642-0</span>
+        <span class="hint">Se copia sin guiones ni ceros iniciales: 98726420</span>
+      </span>
+      <span class="chip" aria-hidden="true">Copiar</span>
+    </button>
+  </section>
+
+  <button type="button" class="all" id="copiar-todo">Copiar todos los datos</button>
+
+  <p class="status" id="estado" role="status" aria-live="polite"></p>
+
+  <div class="manual" id="manual" hidden>
+    <p>No se pudo copiar automáticamente. Mantenga presionado el texto para copiarlo.</p>
+    <textarea id="manual-texto" rows="5" readonly aria-label="Datos para copiar manualmente"></textarea>
+  </div>
+
+  <p class="note">Antes de confirmar, revise que el destinatario que muestra su banco sea Urban Nikkei SpA.</p>
+</main>
+
+<script>
+(function () {
+  var TODO = [
+    'Urban Nikkei SpA',
+    'RUT: 78.206.962-4',
+    'Banco Santander',
+    'Cuenta Corriente',
+    'N° de cuenta: 0-000-9872642-0'
+  ].join('\n');
+
+  var estado = document.getElementById('estado');
+  var manual = document.getElementById('manual');
+  var manualTexto = document.getElementById('manual-texto');
+  var botonTodo = document.getElementById('copiar-todo');
+  var timers = {};
+
+  function copiaAntigua(texto) {
+    var ta = document.createElement('textarea');
+    ta.value = texto;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.left = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    ta.remove();
+    return ok;
+  }
+
+  function copiar(texto) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(texto).then(
+        function () { return true; },
+        function () { return copiaAntigua(texto); }
+      );
+    }
+    return Promise.resolve(copiaAntigua(texto));
+  }
+
+  function mostrarManual(texto) {
+    estado.textContent = '';
+    manualTexto.value = texto;
+    manualTexto.rows = texto.split('\n').length + 1;
+    manual.hidden = false;
+    manualTexto.focus();
+    manualTexto.select();
+  }
+
+  function confirmar(mensaje) {
+    manual.hidden = true;
+    estado.textContent = mensaje;
+    clearTimeout(timers.estado);
+    timers.estado = setTimeout(function () { estado.textContent = ''; }, 3500);
+  }
+
+  document.querySelectorAll('.row').forEach(function (fila) {
+    fila.addEventListener('click', function () {
+      var texto = fila.getAttribute('data-copy');
+      var chip = fila.querySelector('.chip');
+      copiar(texto).then(function (ok) {
+        if (!ok) { mostrarManual(texto); return; }
+        fila.classList.add('done');
+        chip.textContent = 'Copiado';
+        confirmar('Copiado: ' + texto);
+        clearTimeout(timers[fila.id]);
+        timers[fila.id] = setTimeout(function () {
+          fila.classList.remove('done');
+          chip.textContent = 'Copiar';
+        }, 2000);
+      });
+    });
+  });
+
+  botonTodo.addEventListener('click', function () {
+    copiar(TODO).then(function (ok) {
+      if (!ok) { mostrarManual(TODO); return; }
+      botonTodo.textContent = 'Datos copiados';
+      confirmar('Ya puede pegarlos en su banco.');
+      clearTimeout(timers.todo);
+      timers.todo = setTimeout(function () {
+        botonTodo.textContent = 'Copiar todos los datos';
+      }, 2000);
+    });
+  });
+})();
+</script>
+</body>
+</html>
